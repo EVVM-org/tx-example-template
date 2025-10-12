@@ -1,3 +1,75 @@
+/* --- Custom classes moved from inline styles in page.tsx --- */
+.evvm-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  background: #f8fafc;
+  border: 1.5px solid #d1d5db;
+  border-radius: 10px;
+  padding: 1rem 1.5rem;
+  min-width: 0;
+  box-shadow: 0 2px 8px 0 rgba(0,0,0,0.04);
+}
+
+.evvm-summary-item {
+  font-size: 15px;
+  color: #444;
+  font-family: monospace;
+}
+
+.evvm-input-row {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  align-items: center;
+}
+
+.evvm-address-input {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  background: #f9fafb;
+  color: #222;
+  border: 1.5px solid #d1d5db;
+  width: 420px;
+  font-family: monospace;
+  font-size: 16px;
+  box-sizing: border-box;
+  outline: none;
+  transition: border 0.2s;
+}
+
+.evvm-network-select {
+  padding: 0.7rem 1.2rem;
+  border-radius: 8px;
+  border: 1.5px solid #d1d5db;
+  background: #f9fafb;
+  color: #222;
+  font-weight: 500;
+  font-size: 15px;
+  min-width: 180px;
+  margin-right: 8px;
+  box-shadow: 0 1px 4px 0 rgba(0,0,0,0.03);
+  outline: none;
+  transition: border 0.2s;
+  cursor: pointer;
+}
+
+.evvm-summary-btn {
+  padding: 0.7rem 1.5rem;
+  border-radius: 8px;
+  border: 1.5px solid #d1d5db;
+  background: #f3f4f6;
+  color: #222;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background 0.2s;
+  min-width: 140px;
+}
+.evvm-summary-btn:disabled {
+  background: #e5e7eb;
+  cursor: not-allowed;
+}
 :root {
   --background: #ffffff;
   --foreground: #171717;

@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { getAccount } from "@wagmi/core";
+import { getAccount, readContract } from "@wagmi/core";
 import { config } from "@/config/index";
 import { useSignatureBuilder } from "@/utils/useEVVMSignatureBuilder";
 import { getAccountWithRetry } from "@/utils/getAccountWithRetry";
@@ -13,15 +13,18 @@ import { PrioritySelector } from "./InputsAndModules/PrioritySelector";
 import { NumberInputWithGenerator } from "./InputsAndModules/NumberInputWithGenerator";
 import { HelperInfo } from "./InputsAndModules/HelperInfo";
 import { DataDisplayWithClear } from "./InputsAndModules/DataDisplayWithClear";
+import Evvm from "@/constants/abi/Evvm.json";
 
 interface PaySignaturesComponentProps {
   evvmID: string;
   evvmAddress: string;
+  explanation?: number; // Optional prop to control explanation display
 }
 
 export const PaySignaturesComponent = ({
   evvmID,
   evvmAddress,
+  explanation = 3,
 }: PaySignaturesComponentProps) => {
   const { signPay } = useSignatureBuilder();
   let account = getAccount(config);
@@ -30,6 +33,20 @@ export const PaySignaturesComponent = ({
   const [isUsingExecutor, setIsUsingExecutor] = React.useState(false);
   const [priority, setPriority] = React.useState("low");
   const [dataToGet, setDataToGet] = React.useState<PayInputData | null>(null);
+  const [syncNonce, setSyncNonce] = React.useState<number | null>(null);
+
+  const readNextSyncNonce = async () => {
+    const walletData = await getAccountWithRetry(config);
+    if (!walletData) return;
+    readContract(config, {
+      abi: Evvm.abi,
+      address: evvmAddress as `0x${string}`,
+      functionName: "getNextCurrentSyncNonce",
+      args: [walletData.address as `0x${string}`],
+    }).then((nonce) => {
+      setSyncNonce(Number(nonce));
+    });
+  };
 
   const makeSig = async () => {
     const walletData = await getAccountWithRetry(config);
@@ -40,7 +57,12 @@ export const PaySignaturesComponent = ({
 
     const formData = {
       evvmID: evvmID,
-      nonce: getValue("nonceInput_Pay"),
+      nonce:
+        explanation < 1
+          ? getValue("nonceInput_Pay")
+          : syncNonce
+          ? BigInt(syncNonce)
+          : 0,
       tokenAddress: getValue("tokenAddress_Pay"),
       to: getValue(isUsingUsernames ? "toUsername" : "toAddress"),
       executor: isUsingExecutor
@@ -168,37 +190,60 @@ export const PaySignaturesComponent = ({
       ))}
 
       {/* Executor configuration */}
-
-      <ExecutorSelector
-        inputId="executorInput_Pay"
-        placeholder="Enter executor address"
-        onExecutorToggle={setIsUsingExecutor}
-        isUsingExecutor={isUsingExecutor}
-      />
+      {explanation >= 2 && (
+        <ExecutorSelector
+          inputId="executorInput_Pay"
+          placeholder="Enter executor address"
+          onExecutorToggle={setIsUsingExecutor}
+          isUsingExecutor={isUsingExecutor}
+        />
+      )}
 
       {/* Priority configuration */}
 
-      <PrioritySelector onPriorityChange={setPriority} />
+      {explanation >= 3 ? (
+        <div>
+          <PrioritySelector onPriorityChange={setPriority} />
 
-      {/* Nonce section with automatic generator */}
+          {/* Nonce section with automatic generator */}
 
-      <NumberInputWithGenerator
-        label="Nonce"
-        inputId="nonceInput_Pay"
-        placeholder="Enter nonce"
-        showRandomBtn={priority !== "low"}
-      />
+          <NumberInputWithGenerator
+            label="Nonce"
+            inputId="nonceInput_Pay"
+            placeholder="Enter nonce"
+            showRandomBtn={priority !== "low"}
+          />
 
-      <div>
-        {priority === "low" && (
-          <HelperInfo label="How to find my sync nonce?">
-            <div>
-              You can retrieve your next sync nonce from the EVVM contract using
-              the <code>getNextCurrentSyncNonce</code> function.
+          <div>
+            {priority === "low" && (
+              <HelperInfo label="How to find my sync nonce?">
+                <div>
+                  You can retrieve your next sync nonce from the EVVM contract
+                  using the <code>getNextCurrentSyncNonce</code> function.
+                </div>
+              </HelperInfo>
+            )}
+          </div>
+        </div>
+      ) : (
+        <div>
+          {syncNonce !== null ? (
+            <div style={{ marginTop: "0.5rem" }}>
+              Next sync nonce: {syncNonce}
             </div>
-          </HelperInfo>
-        )}
-      </div>
+          ) : (
+            <button
+              onClick={readNextSyncNonce}
+              style={{
+                padding: "0.5rem",
+                marginTop: "1rem",
+              }}
+            >
+              Find next sync nonce
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Create signature button */}
       <button

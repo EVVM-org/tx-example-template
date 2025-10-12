@@ -1,9 +1,7 @@
 "use client";
 // import { cookieStorage, createStorage, http } from '@wagmi/core'
 import { ConnectButton } from "@/components/ConnectButton";
-import { InfoList } from "@/components/InfoList";
-import { ActionButtonList } from "@/components/ActionButtonList";
-import Image from 'next/image';
+import Image from "next/image";
 import { PaySignaturesComponent } from "@/components/PaySignaturesComponent";
 import { useState } from "react";
 import { config, networks } from "@/config/index";
@@ -115,130 +113,58 @@ export default function Home() {
     }
   };
 
-
-  
   return (
     <div className={"pages"}>
-      <Image src="/reown.svg" alt="Reown" width={150} height={150} priority />
-      <h1>AppKit Wagmi Next.js App Router Example</h1>
-
       <ConnectButton />
-      <ActionButtonList />
-      <div className="advice">
-        <p>
-          This projectId only works on localhost. <br/>Go to <a href="https://dashboard.reown.com" target="_blank" className="link-button" rel="Reown Dashboard">Reown Dashboard</a> to get your own.
-        </p>
-      </div>
-      <InfoList />
+
       {evvmID && stakingAddress && nameserviceAddress ? (
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "0.5rem",
-              background: "#f8fafc",
-              border: "1.5px solid #d1d5db",
-              borderRadius: 10,
-              padding: "1rem 1.5rem",
-              minWidth: 0,
-              boxShadow: "0 2px 8px 0 rgba(0,0,0,0.04)",
-            }}
-          >
-            <div
-              style={{ fontSize: 15, color: "#444", fontFamily: "monospace" }}
-            >
-              <strong>evvmID:</strong> {String(evvmID)}
-            </div>
-            <div
-              style={{ fontSize: 15, color: "#444", fontFamily: "monospace" }}
-            >
-              <strong>evvm:</strong> {evvmAddress}
-            </div>
-            <div
-              style={{ fontSize: 15, color: "#444", fontFamily: "monospace" }}
-            >
-              <strong>staking:</strong> {stakingAddress}
-            </div>
-            <div
-              style={{ fontSize: 15, color: "#444", fontFamily: "monospace" }}
-            >
-              <strong>nameService:</strong> {nameserviceAddress}
-            </div>
+        <div className="evvm-summary">
+          <div className="evvm-summary-item">
+            <strong>evvmID:</strong> {String(evvmID)}
           </div>
-        ) : (
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              gap: "1rem",
-              alignItems: "center",
-            }}
-          >
-            <input
-              type="text"
-              placeholder="EVVM Address"
-              value={evvmAddress}
-              onChange={(e) => setEvvmAddress(e.target.value)}
-              style={{
-                padding: "0.75rem 1rem",
-                borderRadius: 8,
-                background: "#f9fafb",
-                color: "#222",
-                border: "1.5px solid #d1d5db",
-                width: 420,
-                fontFamily: "monospace",
-                fontSize: 16,
-                boxSizing: "border-box",
-                outline: "none",
-                transition: "border 0.2s",
-              }}
-            />
-            <select
-              style={{
-                padding: "0.7rem 1.2rem",
-                borderRadius: 8,
-                border: "1.5px solid #d1d5db",
-                background: "#f9fafb",
-                color: "#222",
-                fontWeight: 500,
-                fontSize: 15,
-                minWidth: 180,
-                marginRight: 8,
-                boxShadow: "0 1px 4px 0 rgba(0,0,0,0.03)",
-                outline: "none",
-                transition: "border 0.2s",
-                cursor: "pointer",
-              }}
-              value={network}
-              onChange={handleNetworkChange}
-            >
-              {networkOptions.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-            <button
-              onClick={fetchEvvmSummary}
-              style={{
-                padding: "0.7rem 1.5rem",
-                borderRadius: 8,
-                border: "1.5px solid #d1d5db",
-                background: loadingIDs ? "#e5e7eb" : "#f3f4f6",
-                color: "#222",
-                fontWeight: 600,
-                fontSize: 15,
-                cursor: loadingIDs ? "not-allowed" : "pointer",
-                transition: "background 0.2s",
-                minWidth: 140,
-              }}
-              disabled={loadingIDs}
-            >
-              {loadingIDs ? "Loading..." : "Use this EVVM"}
-            </button>
+          <div className="evvm-summary-item">
+            <strong>evvm:</strong> {evvmAddress}
           </div>
-        )}
-      <PaySignaturesComponent evvmID={evvmID} evvmAddress={evvmAddress} />
+          <div className="evvm-summary-item">
+            <strong>staking:</strong> {stakingAddress}
+          </div>
+          <div className="evvm-summary-item">
+            <strong>nameService:</strong> {nameserviceAddress}
+          </div>
+        </div>
+      ) : (
+        <div className="evvm-input-row">
+          <input
+            type="text"
+            placeholder="EVVM Address"
+            value={evvmAddress}
+            onChange={(e) => setEvvmAddress(e.target.value)}
+            className="evvm-address-input"
+          />
+          <select
+            className="evvm-network-select"
+            value={network}
+            onChange={handleNetworkChange}
+          >
+            {networkOptions.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+          <button
+            onClick={fetchEvvmSummary}
+            className="evvm-summary-btn"
+            disabled={loadingIDs}
+            style={
+              loadingIDs ? { background: "#e5e7eb", cursor: "not-allowed" } : {}
+            }
+          >
+            {loadingIDs ? "Loading..." : "Use this EVVM"}
+          </button>
+        </div>
+      )}
+      <PaySignaturesComponent evvmID={evvmID} evvmAddress={evvmAddress} explanation={1} />
     </div>
   );
 }

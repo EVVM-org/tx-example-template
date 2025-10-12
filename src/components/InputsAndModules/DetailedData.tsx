@@ -7,7 +7,13 @@ export const DetailedData = ({
 }) => {
   const [showData, setShowData] = useState(false);
   return (
-    <div>
+    <div style={{ 
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      
+    }}>
       <h2>Ready</h2>
 
       <button
@@ -31,6 +37,10 @@ export const DetailedData = ({
             textAlign: "left",
             padding: "1rem",
             marginTop: "1rem",
+            maxWidth: "60%",
+          
+            
+            
           }}
         >
           {Object.entries(dataToGet).map(([key, value]) => (
