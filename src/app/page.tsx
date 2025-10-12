@@ -9,12 +9,12 @@ import { readContracts, switchChain } from "@wagmi/core";
 import Evvm from "@/constants/abi/Evvm.json";
 
 export default function Home() {
-  const [menu, setMenu] = useState("faucet");
   const [evvmID, setEvvmID] = useState("");
   const [evvmAddress, setEvvmAddress] = useState("");
   const [nameserviceAddress, setNameserviceAddress] = useState("");
   const [stakingAddress, setStakingAddress] = useState("");
   const [loadingIDs, setLoadingIDs] = useState(false);
+  const [expl, setExpl] = useState<number>(1);
   // Map selector value to network object
   const networkOptions = [
     { value: "sepolia", label: "Sepolia" },
@@ -164,7 +164,21 @@ export default function Home() {
           </button>
         </div>
       )}
-      <PaySignaturesComponent evvmID={evvmID} evvmAddress={evvmAddress} explanation={1} />
+      
+      {/* Explanation selector */}
+      <div style={{ margin: '20px 0' }}>
+        <select
+          className="evvm-network-select"
+          value={expl}
+          onChange={e => setExpl(Number(e.target.value))}
+          style={{ padding: '0.5rem 1rem', borderRadius: 6, fontSize: 15 }}
+        >
+          <option value={1}>simple explanation</option>
+          <option value={2}>executor explanation</option>
+          <option value={3}>nonces explanation</option>
+        </select>
+      </div>
+      <PaySignaturesComponent evvmID={evvmID} evvmAddress={evvmAddress} explanation={expl} />
     </div>
   );
 }
