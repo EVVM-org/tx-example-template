@@ -117,7 +117,10 @@ export default function Home() {
     <div className={"pages"}>
       <header className="evvm-header">
         <div className="evvm-header-left">
-          <a href="https://www.evvm.info/docs/intro" style={{ display: "flex", alignItems: "center" }}>
+          <a
+            href="https://www.evvm.info/docs/intro"
+            style={{ display: "flex", alignItems: "center" }}
+          >
             <Image
               src="/evvm.svg"
               alt="EVVM Logo"
@@ -128,20 +131,6 @@ export default function Home() {
           </a>
         </div>
         <div className="evvm-header-right">
-          <a
-            href="https://www.evvm.info/docs/intro"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <button className="evvm-header-btn">Docs</button>
-          </a>
-          <a
-            href="https://evvm.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <button className="evvm-header-btn">Website</button>
-          </a>
           <div className="evvm-header-connect">
             <ConnectButton />
           </div>
@@ -197,19 +186,23 @@ export default function Home() {
       )}
 
       {/* Explanation selector */}
-      <div style={{ margin: '20px 0' }}>
+      <div style={{ margin: "20px 0" }}>
         <select
           className="evvm-network-select"
           value={expl}
-          onChange={e => setExpl(Number(e.target.value))}
-          style={{ padding: '0.5rem 1rem', borderRadius: 6, fontSize: 15 }}
+          onChange={(e) => setExpl(Number(e.target.value))}
+          style={{ padding: "0.5rem 1rem", borderRadius: 6, fontSize: 15 }}
         >
           <option value={1}>simple explanation</option>
           <option value={2}>executor explanation</option>
           <option value={3}>nonces explanation</option>
         </select>
       </div>
-      <PaySignaturesComponent evvmID={evvmID} evvmAddress={evvmAddress} explanation={expl} />
+      <PaySignaturesComponent
+        evvmID={evvmID}
+        evvmAddress={evvmAddress}
+        explanation={expl}
+      />
     </div>
   );
 }
