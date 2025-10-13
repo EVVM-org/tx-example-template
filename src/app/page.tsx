@@ -115,7 +115,38 @@ export default function Home() {
 
   return (
     <div className={"pages"}>
-      <ConnectButton />
+      <header className="evvm-header">
+        <div className="evvm-header-left">
+          <a href="https://www.evvm.info/docs/intro" style={{ display: "flex", alignItems: "center" }}>
+            <Image
+              src="/evvm.svg"
+              alt="EVVM Logo"
+              width={60}
+              height={90}
+              priority
+            />
+          </a>
+        </div>
+        <div className="evvm-header-right">
+          <a
+            href="https://www.evvm.info/docs/intro"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <button className="evvm-header-btn">Docs</button>
+          </a>
+          <a
+            href="https://evvm.org"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <button className="evvm-header-btn">Website</button>
+          </a>
+          <div className="evvm-header-connect">
+            <ConnectButton />
+          </div>
+        </div>
+      </header>
 
       {evvmID && stakingAddress && nameserviceAddress ? (
         <div className="evvm-summary">
@@ -164,7 +195,7 @@ export default function Home() {
           </button>
         </div>
       )}
-      
+
       {/* Explanation selector */}
       <div style={{ margin: '20px 0' }}>
         <select

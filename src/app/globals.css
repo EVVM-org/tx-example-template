@@ -1,3 +1,69 @@
+/* Header styles for EVVM */
+.evvm-header {
+  width: 90vw;
+  min-width: 90vw;
+  height: 10px;
+  left: 0;
+  top: 0;
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  background: #03221E;
+  border-radius: 999px;
+  box-shadow: 0 2px 12px 0 rgba(0,0,0,0.07);
+  border: none;
+  padding: 0.5rem 2.5rem 0.5rem 1.5rem;
+  min-height: 70px;
+  margin-bottom: 32px;
+  margin-top: 8px;
+  z-index: 10;
+}
+
+.evvm-header-left {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.evvm-header-right {
+  display: flex;
+  gap: 0.5rem;
+  flex: 1;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.evvm-header-btn {
+  padding: 0.45rem 1.1rem;
+  border-radius: 999px;
+  border: 1.5px solid #00EE96;
+  background: #00EE96;
+  color: #03221E;
+  font-weight: 600;
+  font-size: 15px;
+  height: 45px;
+  width: 100px;
+  cursor: pointer;
+  margin-left: 0.5rem;
+  margin-right: 0.5rem;
+  transition: background 0.2s, color 0.2s;
+}
+.evvm-header-btn:hover {
+  background: #03221E;
+  color: #00EE96;
+}
+
+.evvm-header-connect {
+  margin-left: 10px;
+  background: #fff;
+  border-radius: 999px;
+  padding: 0rem 0rem;
+  box-shadow: 0 1px 4px 0 rgba(0,0,0,0.06);
+  display: flex;
+  align-items: center;
+}
 /* --- Custom classes moved from inline styles in page.tsx --- */
 .evvm-summary {
   display: flex;
@@ -19,8 +85,8 @@
 
 .evvm-input-row {
   display: flex;
-  flex-direction: row;
-  gap: 1rem;
+  flex-direction: column;
+  gap: 0.5rem;
   align-items: center;
 }
 
