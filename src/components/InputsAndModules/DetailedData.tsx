@@ -7,13 +7,14 @@ export const DetailedData = ({
 }) => {
   const [showData, setShowData] = useState(false);
   return (
-    <div style={{ 
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center",
-      
-    }}>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
       <h2>Ready</h2>
 
       <button
@@ -38,14 +39,16 @@ export const DetailedData = ({
             padding: "1rem",
             marginTop: "1rem",
             maxWidth: "60%",
-          
-            
-            
+            fontFamily: "monospace",
+            borderRadius: "5px",
+            border: "1px solid #ccc",
           }}
         >
+          {"{"}
+          <div style={{ marginLeft: "1rem" }}>
           {Object.entries(dataToGet).map(([key, value]) => (
             <div key={key} style={{ marginBottom: "0rem" }}>
-              {`${key}: ${
+              {`"${key}": ${
                 typeof value === "object"
                   ? JSON.stringify(
                       value,
@@ -56,6 +59,8 @@ export const DetailedData = ({
               } `}
             </div>
           ))}
+          </div>
+          {"}"}
         </div>
       )}
 
@@ -68,7 +73,14 @@ export const DetailedData = ({
             borderRadius: "5px",
           }}
           onClick={() =>
-            navigator.clipboard.writeText(JSON.stringify(dataToGet, null, 2))
+            navigator.clipboard.writeText(
+              JSON.stringify(
+                dataToGet,
+                (key, value) =>
+                  typeof value === "bigint" ? value.toString() : value,
+                2
+              )
+            )
           }
         >
           Copy for JSON

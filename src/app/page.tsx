@@ -22,6 +22,8 @@ export default function Home() {
     { value: "hederaTestnet", label: "Hedera Testnet" },
   ];
   const [network, setNetwork] = useState("sepolia");
+  // Estado para forzar reinicio de PaySignaturesComponent
+  const [resetKey, setResetKey] = useState<number>(0);
 
   const handleNetworkChange = async (
     e: React.ChangeEvent<HTMLSelectElement>
@@ -190,15 +192,20 @@ export default function Home() {
         <select
           className="evvm-network-select"
           value={expl}
-          onChange={(e) => setExpl(Number(e.target.value))}
+          onChange={(e) => {
+            setExpl(Number(e.target.value));
+            // Limpiar dataToGet en el hijo PaySignaturesComponent usando una key
+            setResetKey((prev) => prev + 1);
+          }}
           style={{ padding: "0.5rem 1rem", borderRadius: 6, fontSize: 15 }}
         >
-          <option value={1}>simple explanation</option>
-          <option value={2}>executor explanation</option>
-          <option value={3}>nonces explanation</option>
+          <option value={1}>payment explanation</option>
+          <option value={2}>nonces explanation</option>
+          <option value={3}>executor explanation</option>
         </select>
       </div>
       <PaySignaturesComponent
+        key={resetKey}
         evvmID={evvmID}
         evvmAddress={evvmAddress}
         explanation={expl}

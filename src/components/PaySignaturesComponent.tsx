@@ -190,7 +190,7 @@ export const PaySignaturesComponent = ({
       ))}
 
       {/* Executor configuration */}
-      {explanation >= 2 && (
+      {explanation >= 3 && (
         <ExecutorSelector
           inputId="executorInput_Pay"
           placeholder="Enter executor address"
@@ -201,7 +201,7 @@ export const PaySignaturesComponent = ({
 
       {/* Priority configuration */}
 
-      {explanation >= 3 ? (
+      {explanation >= 2 ? (
         <div>
           <PrioritySelector onPriorityChange={setPriority} />
 
