@@ -6,7 +6,9 @@ import { PaySignaturesComponent } from "@/components/PaySignaturesComponent";
 import { useState } from "react";
 import { config, networks } from "@/config/index";
 import { readContracts, switchChain } from "@wagmi/core";
-import Evvm from "@/constants/abi/Evvm.json";
+import {
+  EvvmABI,
+} from "@evvm/viem-signature-library";
 
 export default function Home() {
   const [evvmID, setEvvmID] = useState("");
@@ -70,19 +72,19 @@ export default function Home() {
     try {
       const contracts = [
         {
-          abi: Evvm.abi as any,
+          abi: EvvmABI as any,
           address: evvmAddress as `0x${string}`,
           functionName: "getEvvmID",
           args: [],
         },
         {
-          abi: Evvm.abi as any,
+          abi: EvvmABI as any,
           address: evvmAddress as `0x${string}`,
           functionName: "getStakingContractAddress",
           args: [],
         },
         {
-          abi: Evvm.abi as any,
+          abi: EvvmABI as any,
           address: evvmAddress as `0x${string}`,
           functionName: "getNameServiceAddress",
           args: [],

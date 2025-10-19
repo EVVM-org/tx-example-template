@@ -7,11 +7,12 @@
  * Input types match the contract ABI.
  */
 import { writeContract } from "@wagmi/core";
+import { config } from "@/config";
+
 import {
   PayInputData,
-} from "./TypeInputStructures/evvmTypeInputStructure";
-import { config } from "@/config";
-import Evvm from "@/constants/abi/Evvm.json";
+  EvvmABI,
+} from "@evvm/viem-signature-library";
 
 const executePay = async (
   InputData: PayInputData,
@@ -22,7 +23,7 @@ const executePay = async (
   }
 
   return writeContract(config, {
-    abi: Evvm.abi,
+    abi: EvvmABI,
     address: evvmAddress,
     functionName: "pay",
     args: [

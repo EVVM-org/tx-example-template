@@ -1,10 +1,8 @@
 "use client";
 import React from "react";
-import { getAccount, readContract } from "@wagmi/core";
+import { getAccount, getWalletClient, readContract } from "@wagmi/core";
 import { config } from "@/config/index";
-import { useSignatureBuilder } from "@/utils/useEVVMSignatureBuilder";
 import { getAccountWithRetry } from "@/utils/getAccountWithRetry";
-import { PayInputData } from "@/utils/TypeInputStructures/evvmTypeInputStructure";
 import { executePay } from "@/utils/useEVVMTransactionExecuter";
 import { TitleAndLink } from "./InputsAndModules/TitleAndLink";
 import { AddressInputField } from "./InputsAndModules/AddressInputField";
@@ -13,7 +11,11 @@ import { PrioritySelector } from "./InputsAndModules/PrioritySelector";
 import { NumberInputWithGenerator } from "./InputsAndModules/NumberInputWithGenerator";
 import { HelperInfo } from "./InputsAndModules/HelperInfo";
 import { DataDisplayWithClear } from "./InputsAndModules/DataDisplayWithClear";
-import Evvm from "@/constants/abi/Evvm.json";
+import {
+  EVVMSignatureBuilder,
+  PayInputData,
+  EvvmABI,
+} from "@evvm/viem-signature-library";
 
 interface PaySignaturesComponentProps {
   evvmID: string;
@@ -26,7 +28,6 @@ export const PaySignaturesComponent = ({
   evvmAddress,
   explanation = 3,
 }: PaySignaturesComponentProps) => {
-  const { signPay } = useSignatureBuilder();
   let account = getAccount(config);
 
   const [isUsingUsernames, setIsUsingUsernames] = React.useState(false);
@@ -39,7 +40,7 @@ export const PaySignaturesComponent = ({
     const walletData = await getAccountWithRetry(config);
     if (!walletData) return;
     readContract(config, {
-      abi: Evvm.abi,
+      abi: EvvmABI,
       address: evvmAddress as `0x${string}`,
       functionName: "getNextCurrentSyncNonce",
       args: [walletData.address as `0x${string}`],
@@ -58,10 +59,10 @@ export const PaySignaturesComponent = ({
     const formData = {
       evvmID: evvmID,
       nonce:
-        explanation < 1
+        explanation >= 2
           ? getValue("nonceInput_Pay")
-          : syncNonce
-          ? BigInt(syncNonce)
+          : syncNonce !== null
+          ? syncNonce
           : 0,
       tokenAddress: getValue("tokenAddress_Pay"),
       to: getValue(isUsingUsernames ? "toUsername" : "toAddress"),
@@ -72,33 +73,41 @@ export const PaySignaturesComponent = ({
       priorityFee: getValue("priorityFeeInput_Pay"),
     };
 
-    signPay(
-      BigInt(formData.evvmID),
-      formData.to,
-      formData.tokenAddress as `0x${string}`,
-      BigInt(formData.amount),
-      BigInt(formData.priorityFee),
-      BigInt(formData.nonce),
-      priority === "high",
-      formData.executor as `0x${string}`,
-      (signature: string) => {
-        setDataToGet({
-          from: walletData.address as `0x${string}`,
-          to_address: (formData.to.startsWith("0x")
-            ? formData.to
-            : "0x0000000000000000000000000000000000000000") as `0x${string}`,
-          to_identity: formData.to.startsWith("0x") ? "" : formData.to,
-          token: formData.tokenAddress as `0x${string}`,
-          amount: BigInt(formData.amount),
-          priorityFee: BigInt(formData.priorityFee),
-          nonce: BigInt(formData.nonce),
-          priority: priority === "high",
-          executor: formData.executor,
-          signature,
-        });
-      },
-      (error: Error) => console.error("Error signing payment:", error)
-    );
+    try {
+      const walletClient = await getWalletClient(config);
+      const signatureBuilder = new (EVVMSignatureBuilder as any)(
+        walletClient,
+        walletData
+      );
+
+      const signature = await signatureBuilder.signPay(
+        BigInt(formData.evvmID),
+        formData.to,
+        formData.tokenAddress as `0x${string}`,
+        BigInt(formData.amount),
+        BigInt(formData.priorityFee),
+        BigInt(formData.nonce),
+        priority === "high",
+        formData.executor as `0x${string}`
+      );
+
+      setDataToGet({
+        from: walletData.address as `0x${string}`,
+        to_address: (formData.to.startsWith("0x")
+          ? formData.to
+          : "0x0000000000000000000000000000000000000000") as `0x${string}`,
+        to_identity: formData.to.startsWith("0x") ? "" : formData.to,
+        token: formData.tokenAddress as `0x${string}`,
+        amount: BigInt(formData.amount),
+        priorityFee: BigInt(formData.priorityFee),
+        nonce: BigInt(formData.nonce),
+        priority: priority === "high",
+        executor: formData.executor,
+        signature,
+      });
+    } catch (error) {
+      console.error("Error creating signature:", error);
+    }
   };
 
   const executePayment = async () => {
