@@ -1,21 +1,26 @@
 "use client";
 import React from "react";
-import { getAccount, getWalletClient, readContract } from "@wagmi/core";
 import { config } from "@/config/index";
+import { getWalletClient, readContract } from "@wagmi/core";
+import {
+  TitleAndLink,
+  NumberInputWithGenerator,
+  AddressInputField,
+  PrioritySelector,
+  ExecutorSelector,
+  DataDisplayWithClear,
+  HelperInfo,
+} from "@/components/InputsAndModules";
+
 import { getAccountWithRetry } from "@/utils/getAccountWithRetry";
-import { executePay } from "@/utils/useEVVMTransactionExecuter";
-import { TitleAndLink } from "./InputsAndModules/TitleAndLink";
-import { AddressInputField } from "./InputsAndModules/AddressInputField";
-import { ExecutorSelector } from "./InputsAndModules/ExecutorSelector";
-import { PrioritySelector } from "./InputsAndModules/PrioritySelector";
-import { NumberInputWithGenerator } from "./InputsAndModules/NumberInputWithGenerator";
-import { HelperInfo } from "./InputsAndModules/HelperInfo";
-import { DataDisplayWithClear } from "./InputsAndModules/DataDisplayWithClear";
+
 import {
   EVVMSignatureBuilder,
   PayInputData,
   EvvmABI,
 } from "@evvm/viem-signature-library";
+
+import { executePay } from "@/utils/useEVVMTransactionExecuter";
 
 interface PaySignaturesComponentProps {
   evvmID: string;
@@ -28,8 +33,6 @@ export const PaySignaturesComponent = ({
   evvmAddress,
   explanation = 3,
 }: PaySignaturesComponentProps) => {
-  let account = getAccount(config);
-
   const [isUsingUsernames, setIsUsingUsernames] = React.useState(false);
   const [isUsingExecutor, setIsUsingExecutor] = React.useState(false);
   const [priority, setPriority] = React.useState("low");
