@@ -1,7 +1,11 @@
 "use client";
 import React from "react";
+
+// Wagmi configuration and utilities for wallet interactions
 import { config } from "@/config/index";
 import { getWalletClient, readContract } from "@wagmi/core";
+
+// Custom UI components for form inputs and displays
 import {
   TitleAndLink,
   NumberInputWithGenerator,
@@ -12,36 +16,46 @@ import {
   HelperInfo,
 } from "@/components/InputsAndModules";
 
+// Utility functions for wallet and transaction handling
 import { getAccountWithRetry } from "@/utils/getAccountWithRetry";
 
+// EVVM library for creating and handling signatures
 import {
   EVVMSignatureBuilder,
   PayInputData,
   EvvmABI,
 } from "@evvm/viem-signature-library";
 
+// Function to execute the payment transaction
 import { executePay } from "@/utils/useEVVMTransactionExecuter";
 
+// Component props interface - defines what data this component needs
 interface PaySignaturesComponentProps {
-  evvmID: string;
-  evvmAddress: string;
-  explanation?: number; // Optional prop to control explanation display
+  evvmID: string;        // The EVVM system identifier
+  evvmAddress: string;   // The smart contract address
+  explanation?: number;  // Controls which UI elements are shown (1=basic, 2=medium, 3=advanced)
 }
 
 export const PaySignaturesComponent = ({
   evvmID,
   evvmAddress,
-  explanation = 3,
+  explanation = 3, // Default to showing all options
 }: PaySignaturesComponentProps) => {
-  const [isUsingUsernames, setIsUsingUsernames] = React.useState(false);
-  const [isUsingExecutor, setIsUsingExecutor] = React.useState(false);
-  const [priority, setPriority] = React.useState("low");
-  const [dataToGet, setDataToGet] = React.useState<PayInputData | null>(null);
-  const [syncNonce, setSyncNonce] = React.useState<number | null>(null);
+  
+  // State variables to manage form behavior and data
+  const [isUsingUsernames, setIsUsingUsernames] = React.useState(false); // Toggle between address/username input
+  const [isUsingExecutor, setIsUsingExecutor] = React.useState(false);   // Whether to use a custom executor
+  const [priority, setPriority] = React.useState("low");                 // Transaction priority level
+  const [dataToGet, setDataToGet] = React.useState<PayInputData | null>(null); // Stores the created signature data
+  const [syncNonce, setSyncNonce] = React.useState<number | null>(null);        // Auto-fetched nonce value
 
+  // Function to automatically fetch the next nonce from the blockchain
   const readNextSyncNonce = async () => {
+    // Get the current wallet connection
     const walletData = await getAccountWithRetry(config);
     if (!walletData) return;
+    
+    // Read the next nonce from the smart contract
     readContract(config, {
       abi: EvvmABI,
       address: evvmAddress as `0x${string}`,
@@ -52,15 +66,20 @@ export const PaySignaturesComponent = ({
     });
   };
 
+  // Main function to create a cryptographic signature for the payment
   const makeSig = async () => {
+    // Get the current wallet connection
     const walletData = await getAccountWithRetry(config);
     if (!walletData) return;
 
+    // Helper function to get values from form inputs
     const getValue = (id: string) =>
       (document.getElementById(id) as HTMLInputElement).value;
 
+    // Collect all form data into an object
     const formData = {
       evvmID: evvmID,
+      // Use manual nonce if in advanced mode, otherwise use auto-fetched nonce
       nonce:
         explanation >= 2
           ? getValue("nonceInput_Pay")
@@ -71,18 +90,20 @@ export const PaySignaturesComponent = ({
       to: getValue(isUsingUsernames ? "toUsername" : "toAddress"),
       executor: isUsingExecutor
         ? getValue("executorInput_Pay")
-        : "0x0000000000000000000000000000000000000000",
+        : "0x0000000000000000000000000000000000000000", // Use zero address if no executor
       amount: getValue("amountTokenInput_Pay"),
       priorityFee: getValue("priorityFeeInput_Pay"),
     };
 
     try {
+      // Create the signature using the EVVM library
       const walletClient = await getWalletClient(config);
       const signatureBuilder = new (EVVMSignatureBuilder as any)(
         walletClient,
         walletData
       );
 
+      // Generate the actual signature with all parameters
       const signature = await signatureBuilder.signPay(
         BigInt(formData.evvmID),
         formData.to,
@@ -94,6 +115,7 @@ export const PaySignaturesComponent = ({
         formData.executor as `0x${string}`
       );
 
+      // Store the complete payment data for execution
       setDataToGet({
         from: walletData.address as `0x${string}`,
         to_address: (formData.to.startsWith("0x")
@@ -113,17 +135,21 @@ export const PaySignaturesComponent = ({
     }
   };
 
+  // Function to execute the payment transaction on the blockchain
   const executePayment = async () => {
+    // Check if we have signature data to execute
     if (!dataToGet) {
       console.error("No data to execute payment");
       return;
     }
 
+    // Check if EVVM contract address is provided
     if (!evvmAddress) {
       console.error("EVVM address is not provided");
       return;
     }
 
+    // Execute the payment using the utility function
     executePay(dataToGet, evvmAddress as `0x${string}`)
       .then(() => {
         console.log("Payment executed successfully");
@@ -135,18 +161,20 @@ export const PaySignaturesComponent = ({
 
   return (
     <div className="flex flex-1 flex-col justify-center items-center">
+      {/* Page title with documentation link */}
       <TitleAndLink
         title="Single payment"
         link="https://www.evvm.info/docs/SignatureStructures/EVVM/SinglePaymentSignatureStructure"
       />
       <br />
 
-      {/* EVVM ID and Address are now passed as props */}
+      {/* Note: EVVM ID and Address are now passed as props from parent component */}
 
-      {/* Recipient configuration section */}
+      {/* Section 1: Recipient Configuration */}
       <div style={{ marginBottom: "1rem" }}>
         <p>
           To:{" "}
+          {/* Toggle between address and username input */}
           <select
             style={{
               color: "black",
@@ -159,6 +187,7 @@ export const PaySignaturesComponent = ({
             <option value="false">Address</option>
             <option value="true">Username</option>
           </select>
+          {/* Dynamic input field based on selection */}
           <input
             type="text"
             placeholder={isUsingUsernames ? "Enter username" : "Enter address"}
@@ -174,13 +203,14 @@ export const PaySignaturesComponent = ({
         </p>
       </div>
 
+      {/* Section 2: Token Configuration */}
       <AddressInputField
         label="Token address"
         inputId="tokenAddress_Pay"
         placeholder="Enter token address"
       />
 
-      {/* Basic input fields */}
+      {/* Section 3: Payment Amount and Fees */}
       {[
         { label: "Amount", id: "amountTokenInput_Pay", type: "number" },
         { label: "Priority fee", id: "priorityFeeInput_Pay", type: "number" },
@@ -201,7 +231,7 @@ export const PaySignaturesComponent = ({
         </div>
       ))}
 
-      {/* Executor configuration */}
+      {/* Section 4: Advanced Options (only shown in advanced mode) */}
       {explanation >= 3 && (
         <ExecutorSelector
           inputId="executorInput_Pay"
@@ -211,14 +241,15 @@ export const PaySignaturesComponent = ({
         />
       )}
 
-      {/* Priority configuration */}
+      {/* Section 5: Priority and Nonce Configuration */}
 
+      {/* Different UI based on explanation level */}
       {explanation >= 2 ? (
+        /* Advanced mode: Manual priority and nonce configuration */
         <div>
           <PrioritySelector onPriorityChange={setPriority} />
 
-          {/* Nonce section with automatic generator */}
-
+          {/* Nonce input with optional random generator */}
           <NumberInputWithGenerator
             label="Nonce"
             inputId="nonceInput_Pay"
@@ -226,6 +257,7 @@ export const PaySignaturesComponent = ({
             showRandomBtn={priority !== "low"}
           />
 
+          {/* Help information for low priority transactions */}
           <div>
             {priority === "low" && (
               <HelperInfo label="How to find my sync nonce?">
@@ -238,6 +270,7 @@ export const PaySignaturesComponent = ({
           </div>
         </div>
       ) : (
+        /* Simple mode: Automatic nonce handling */
         <div>
           {syncNonce !== null ? (
             <div style={{ marginTop: "0.5rem" }}>
@@ -257,7 +290,7 @@ export const PaySignaturesComponent = ({
         </div>
       )}
 
-      {/* Create signature button */}
+      {/* Section 6: Signature Creation */}
       <button
         onClick={makeSig}
         style={{
@@ -268,7 +301,7 @@ export const PaySignaturesComponent = ({
         Create signature
       </button>
 
-      {/* Results section */}
+      {/* Section 7: Results and Execution */}
       <DataDisplayWithClear
         dataToGet={dataToGet}
         onClear={() => setDataToGet(null)}
